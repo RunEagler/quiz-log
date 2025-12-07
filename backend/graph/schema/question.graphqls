@@ -1,0 +1,60 @@
+extend type Query {
+  questions(quizID: ID): [Question!]!
+  question(id: ID!): Question
+  wrongQuestions: [Question!]!
+}
+
+extend type Mutation {
+  createQuestion(input: CreateQuestionInput!): Question!
+  updateQuestion(id: ID!, input: UpdateQuestionInput!): Question!
+  deleteQuestion(id: ID!): Boolean!
+  importQuestions(data: String!): [Question!]!
+  exportQuestions(quizID: ID): String!
+}
+
+type Question {
+  id: ID!
+  quizID: ID!
+  type: QuestionType!
+  content: String!
+  options: [String!]
+  correctAnswer: String!
+  explanation: String
+  difficulty: Difficulty!
+  tags: [Tag!]!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+input CreateQuestionInput {
+  quizID: ID!
+  type: QuestionType!
+  content: String!
+  options: [String!]
+  correctAnswer: String!
+  explanation: String
+  difficulty: Difficulty!
+  tagIDs: [ID!]
+}
+
+input UpdateQuestionInput {
+  type: QuestionType
+  content: String
+  options: [String!]
+  correctAnswer: String
+  explanation: String
+  difficulty: Difficulty
+  tagIDs: [ID!]
+}

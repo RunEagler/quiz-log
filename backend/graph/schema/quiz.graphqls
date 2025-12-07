@@ -1,0 +1,32 @@
+extend type Query {
+  quizzes: [Quiz!]!
+  quiz(id: ID!): Quiz
+}
+
+extend type Mutation {
+  createQuiz(input: CreateQuizInput!): Quiz!
+  updateQuiz(id: ID!, input: UpdateQuizInput!): Quiz!
+  deleteQuiz(id: ID!): Boolean!
+}
+
+type Quiz {
+  id: ID!
+  title: String!
+  description: String
+  createdAt: Time!
+  updatedAt: Time!
+  questions: [Question!]!
+  tags: [Tag!]!
+}
+
+input CreateQuizInput {
+  title: String!
+  description: String
+  tagIDs: [ID!]
+}
+
+input UpdateQuizInput {
+  title: String
+  description: String
+  tagIDs: [ID!]
+}

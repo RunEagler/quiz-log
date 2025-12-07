@@ -1,0 +1,11 @@
+development:
+  dialect: postgres
+  datasource: host=db port=5432 user=postgres password=postgres dbname=quizlog sslmode=disable
+  dir: db/migrations
+  table: migrations
+
+production:
+  dialect: postgres
+  datasource: host=db port=5432 user=postgres password=postgres dbname=quizlog sslmode=disable
+  dir: db/migrations
+  table: migrations

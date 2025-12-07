@@ -1,0 +1,16 @@
+extend type Query {
+  statistics: Statistics!
+}
+
+type Statistics {
+  totalAttempts: Int!
+  averageScore: Float!
+  categoryStats: [CategoryStat!]!
+  recentAttempts: [Attempt!]!
+}
+
+type CategoryStat {
+  tagName: String!
+  correctRate: Float!
+  totalQuestions: Int!
+}

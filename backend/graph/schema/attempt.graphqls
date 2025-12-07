@@ -1,0 +1,43 @@
+extend type Query {
+  attempts(quizID: ID): [Attempt!]!
+}
+
+extend type Mutation {
+  submitAttempt(input: SubmitAttemptInput!): AttemptResult!
+}
+
+type Attempt {
+  id: ID!
+  quizID: ID!
+  startedAt: Time!
+  completedAt: Time
+  score: Int!
+  totalQuestions: Int!
+  answers: [Answer!]!
+}
+
+type Answer {
+  id: ID!
+  attemptID: ID!
+  questionID: ID!
+  userAnswer: String!
+  isCorrect: Boolean!
+}
+
+type AttemptResult {
+  attempt: Attempt!
+  score: Int!
+  totalQuestions: Int!
+  correctCount: Int!
+  wrongQuestions: [Question!]!
+}
+
+input SubmitAttemptInput {
+  quizID: ID!
+  answers: [AnswerInput!]!
+}
+
+input AnswerInput {
+  questionID: ID!
+  userAnswer: String!
+}

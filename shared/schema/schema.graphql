@@ -1,0 +1,153 @@
+type Query {
+  attempts(quizID: ID): [Attempt!]!
+  questions(quizID: ID): [Question!]!
+  question(id: ID!): Question
+  wrongQuestions: [Question!]!
+  quizzes: [Quiz!]!
+  quiz(id: ID!): Quiz
+  statistics: Statistics!
+  tags: [Tag!]!
+}
+
+type Mutation {
+  submitAttempt(input: SubmitAttemptInput!): AttemptResult!
+  createQuestion(input: CreateQuestionInput!): Question!
+  updateQuestion(id: ID!, input: UpdateQuestionInput!): Question!
+  deleteQuestion(id: ID!): Boolean!
+  importQuestions(data: String!): [Question!]!
+  exportQuestions(quizID: ID): String!
+  createQuiz(input: CreateQuizInput!): Quiz!
+  updateQuiz(id: ID!, input: UpdateQuizInput!): Quiz!
+  deleteQuiz(id: ID!): Boolean!
+  createTag(name: String!): Tag!
+}
+
+type Attempt {
+  id: ID!
+  quizID: ID!
+  startedAt: Time!
+  completedAt: Time
+  score: Int!
+  totalQuestions: Int!
+  answers: [Answer!]!
+}
+
+type Answer {
+  id: ID!
+  attemptID: ID!
+  questionID: ID!
+  userAnswer: String!
+  isCorrect: Boolean!
+}
+
+type AttemptResult {
+  attempt: Attempt!
+  score: Int!
+  totalQuestions: Int!
+  correctCount: Int!
+  wrongQuestions: [Question!]!
+}
+
+input SubmitAttemptInput {
+  quizID: ID!
+  answers: [AnswerInput!]!
+}
+
+input AnswerInput {
+  questionID: ID!
+  userAnswer: String!
+}
+
+scalar Time
+
+type Question {
+  id: ID!
+  quizID: ID!
+  type: QuestionType!
+  content: String!
+  options: [String!]
+  correctAnswer: String!
+  explanation: String
+  difficulty: Difficulty!
+  tags: [Tag!]!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+input CreateQuestionInput {
+  quizID: ID!
+  type: QuestionType!
+  content: String!
+  options: [String!]
+  correctAnswer: String!
+  explanation: String
+  difficulty: Difficulty!
+  tagIDs: [ID!]
+}
+
+input UpdateQuestionInput {
+  type: QuestionType
+  content: String
+  options: [String!]
+  correctAnswer: String
+  explanation: String
+  difficulty: Difficulty
+  tagIDs: [ID!]
+}
+
+type Quiz {
+  id: ID!
+  title: String!
+  description: String
+  createdAt: Time!
+  updatedAt: Time!
+  questions: [Question!]!
+  tags: [Tag!]!
+}
+
+input CreateQuizInput {
+  title: String!
+  description: String
+  tagIDs: [ID!]
+}
+
+input UpdateQuizInput {
+  title: String
+  description: String
+  tagIDs: [ID!]
+}
+
+type Statistics {
+  totalAttempts: Int!
+  averageScore: Float!
+  categoryStats: [CategoryStat!]!
+  recentAttempts: [Attempt!]!
+}
+
+type CategoryStat {
+  tagName: String!
+  correctRate: Float!
+  totalQuestions: Int!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}

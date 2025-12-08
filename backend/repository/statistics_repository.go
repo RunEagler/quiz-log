@@ -8,40 +8,46 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type StatisticsRepository struct {
+//go:generate mockgen -destination=mocks/mock_statistics_repository.go -package=mocks quiz-log/repository StatisticsRepository
+
+// StatisticsRepository defines the interface for statistics repository operations
+type StatisticsRepository interface {
+	CountTotalAttempts(ctx context.Context) (int, error)
+	CalculateAverageScore(ctx context.Context) (float64, error)
+	GetCategoryStats(ctx context.Context) ([]*CategoryStat, error)
+}
+
+type statisticsRepository struct {
 	DB *bun.DB
 }
 
-func NewStatisticsRepository(database *bun.DB) *StatisticsRepository {
-	return &StatisticsRepository{DB: database}
+func NewStatisticsRepository(database *bun.DB) StatisticsRepository {
+	return &statisticsRepository{DB: database}
 }
 
 // CountTotalAttempts counts the total number of attempts
-func (r *StatisticsRepository) CountTotalAttempts(ctx context.Context) (int, error) {
-	countSql, countArgs, err := psql.Select("COUNT(*)").
-		From("attempts").
-		ToSql()
+func (r *statisticsRepository) CountTotalAttempts(ctx context.Context) (int, error) {
+	query := psql.Select("COUNT(*)").
+		From("attempts")
+
+	var count int
+	err := ExecQueryWithReturning[int](ctx, r.DB, query, &count)
 	if err != nil {
 		return 0, err
 	}
 
-	var count int
-	err = r.DB.QueryRowContext(ctx, countSql, countArgs...).Scan(&count)
-	return count, err
+	return count, nil
 }
 
 // CalculateAverageScore calculates the average score
-func (r *StatisticsRepository) CalculateAverageScore(ctx context.Context) (float64, error) {
-	avgSql, avgArgs, err := psql.Select("AVG(CAST(score AS FLOAT) / CAST(total_questions AS FLOAT) * 100)").
+func (r *statisticsRepository) CalculateAverageScore(ctx context.Context) (float64, error) {
+	query := psql.Select("AVG(CAST(score AS FLOAT) / CAST(total_questions AS FLOAT) * 100)").
 		From("attempts").
-		Where(sq.Gt{"total_questions": 0}).
-		ToSql()
-	if err != nil {
-		return 0, err
-	}
+		Where(sq.Gt{"total_questions": 0})
 
 	var avgScore sql.NullFloat64
-	err = r.DB.QueryRowContext(ctx, avgSql, avgArgs...).Scan(&avgScore)
+
+	err := ExecQueryWithReturning[sql.NullFloat64](ctx, r.DB, query, &avgScore)
 	if err != nil {
 		return 0, err
 	}
@@ -61,8 +67,8 @@ type CategoryStat struct {
 }
 
 // GetCategoryStats retrieves statistics by category (tag)
-func (r *StatisticsRepository) GetCategoryStats(ctx context.Context) ([]*CategoryStat, error) {
-	categorySql, categoryArgs, err := psql.Select(
+func (r *statisticsRepository) GetCategoryStats(ctx context.Context) ([]*CategoryStat, error) {
+	queryBuilder := psql.Select(
 		"t.name",
 		"AVG(CASE WHEN a.is_correct THEN 1.0 ELSE 0.0 END) * 100 as correct_rate",
 		"COUNT(*) as total",
@@ -71,28 +77,7 @@ func (r *StatisticsRepository) GetCategoryStats(ctx context.Context) ([]*Categor
 		Join("question_tags qt ON t.id = qt.tag_id").
 		Join("answers a ON qt.question_id = a.question_id").
 		GroupBy("t.name").
-		OrderBy("t.name").
-		ToSql()
+		OrderBy("t.name")
 
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.DB.QueryContext(ctx, categorySql, categoryArgs...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var stats []*CategoryStat
-	for rows.Next() {
-		var stat CategoryStat
-		err := rows.Scan(&stat.TagName, &stat.CorrectRate, &stat.TotalQuestions)
-		if err != nil {
-			return nil, err
-		}
-		stats = append(stats, &stat)
-	}
-
-	return stats, nil
+	return FindAll[CategoryStat](ctx, r.DB, queryBuilder)
 }

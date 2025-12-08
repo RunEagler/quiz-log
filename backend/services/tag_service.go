@@ -12,7 +12,7 @@ import (
 
 type TagService struct {
 	DB   *bun.DB
-	Repo *repository.TagRepository
+	Repo repository.TagRepository
 }
 
 func NewTagService(database *bun.DB) *TagService {

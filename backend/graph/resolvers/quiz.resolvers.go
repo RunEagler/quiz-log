@@ -7,6 +7,9 @@ package resolvers
 
 import (
 	"context"
+	"strconv"
+
+	"quiz-log/dataloader"
 	"quiz-log/graph"
 	"quiz-log/graph/model"
 )
@@ -38,12 +41,22 @@ func (r *queryResolver) Quiz(ctx context.Context, id string) (*model.Quiz, error
 
 // Questions is the resolver for the questions field on Quiz type.
 func (r *quizResolver) Questions(ctx context.Context, obj *model.Quiz) ([]*model.Question, error) {
-	return r.QuizService.GetQuestionsByQuizID(ctx, obj.ID)
+	loaders := dataloader.For(ctx)
+	quizID, err := strconv.Atoi(obj.ID)
+	if err != nil {
+		return nil, err
+	}
+	return loaders.QuestionsByQuizID.Load(ctx, quizID)()
 }
 
 // Tags is the resolver for the tags field on Quiz type.
 func (r *quizResolver) Tags(ctx context.Context, obj *model.Quiz) ([]*model.Tag, error) {
-	return r.QuizService.GetTagsByQuizID(ctx, obj.ID)
+	loaders := dataloader.For(ctx)
+	quizID, err := strconv.Atoi(obj.ID)
+	if err != nil {
+		return nil, err
+	}
+	return loaders.TagsByQuizID.Load(ctx, quizID)()
 }
 
 // Quiz returns graph.QuizResolver implementation.

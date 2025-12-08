@@ -10,7 +10,7 @@ import (
 
 type StatisticsService struct {
 	DB             *bun.DB
-	Repo           *repository.StatisticsRepository
+	Repo           repository.StatisticsRepository
 	AttemptService *AttemptService
 }
 

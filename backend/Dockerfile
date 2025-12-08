@@ -37,10 +37,6 @@ COPY dbconfig.yml ./
 # Install sql-migrate
 COPY --from=builder /go/bin/sql-migrate /usr/local/bin/
 
-# Copy entrypoint script
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 EXPOSE 8080
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["/app/server"]

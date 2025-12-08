@@ -7,6 +7,7 @@ package resolvers
 
 import (
 	"context"
+	
 	"quiz-log/graph/model"
 )
 
@@ -19,17 +20,3 @@ func (r *mutationResolver) SubmitAttempt(ctx context.Context, input model.Submit
 func (r *queryResolver) Attempts(ctx context.Context, quizID *string) ([]*model.Attempt, error) {
 	return r.AttemptService.GetAttempts(ctx, quizID)
 }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *attemptResolver) Answers(ctx context.Context, obj *model.Attempt) ([]*model.Answer, error) {
-	return r.AttemptService.GetAnswersByAttemptID(ctx, obj.ID)
-}
-func (r *Resolver) Attempt() graph.AttemptResolver { return &attemptResolver{r} }
-type attemptResolver struct{ *Resolver }
-*/

@@ -1,8 +1,12 @@
-.PHONY: generate run migrate-up migrate-down migrate-status migrate-new install
+.PHONY: generate run migrate-up migrate-down migrate-status migrate-new install generate-mocks
 
 generate:
 	gqlgen generate
 	@node scripts/merge-schema.js
+
+mockgen:
+	go generate ./repository/...
+	mockgen -destination=repository/mocks/mock_sqlmock.go -package=mocks github.com/DATA-DOG/go-sqlmock Sqlmock
 
 run:
 	go run server.go
@@ -24,3 +28,5 @@ install:
 	go mod download
 	go install github.com/99designs/gqlgen@latest
 	go install github.com/rubenv/sql-migrate/...@latest
+	go install go.uber.org/mock/mockgen@latest
+	go get github.com/DATA-DOG/go-sqlmock

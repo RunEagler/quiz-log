@@ -7,16 +7,24 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type TagRepository struct {
+//go:generate mockgen -destination=mocks/mock_tag_repository.go -package=mocks quiz-log/repository TagRepository
+
+// TagRepository defines the interface for tag repository operations
+type TagRepository interface {
+	Create(ctx context.Context, name string) (int, error)
+	FindAll(ctx context.Context) ([]*db.Tag, error)
+}
+
+type tagRepository struct {
 	DB *bun.DB
 }
 
-func NewTagRepository(database *bun.DB) *TagRepository {
-	return &TagRepository{DB: database}
+func NewTagRepository(database *bun.DB) TagRepository {
+	return &tagRepository{DB: database}
 }
 
 // Create creates a new tag or returns existing one by name
-func (r *TagRepository) Create(ctx context.Context, name string) (int, error) {
+func (r *tagRepository) Create(ctx context.Context, name string) (int, error) {
 	var tagID int
 
 	query := psql.Insert("tags").
@@ -24,12 +32,7 @@ func (r *TagRepository) Create(ctx context.Context, name string) (int, error) {
 		Values(name).
 		Suffix("ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING id")
 
-	sqlStr, args, err := query.ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	err = r.DB.QueryRowContext(ctx, sqlStr, args...).Scan(&tagID)
+	err := ExecQueryWithReturning[int](ctx, r.DB, query, &tagID)
 	if err != nil {
 		return 0, err
 	}
@@ -38,31 +41,10 @@ func (r *TagRepository) Create(ctx context.Context, name string) (int, error) {
 }
 
 // FindAll retrieves all tags
-func (r *TagRepository) FindAll(ctx context.Context) ([]*db.Tag, error) {
+func (r *tagRepository) FindAll(ctx context.Context) ([]*db.Tag, error) {
 	query := psql.Select("id", "name").
 		From("tags").
 		OrderBy("name ASC")
 
-	sqlStr, args, err := query.ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.DB.QueryContext(ctx, sqlStr, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var tags []*db.Tag
-	for rows.Next() {
-		var tag db.Tag
-		err := r.DB.ScanRows(ctx, rows, &tag)
-		if err != nil {
-			return nil, err
-		}
-		tags = append(tags, &tag)
-	}
-
-	return tags, nil
+	return FindAll[db.Tag](ctx, r.DB, query)
 }

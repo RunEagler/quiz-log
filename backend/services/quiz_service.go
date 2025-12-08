@@ -2,17 +2,18 @@ package services
 
 import (
 	"context"
-	"quiz-log/db"
-	"quiz-log/graph/model"
-	"quiz-log/repository"
 	"strconv"
 
 	"github.com/uptrace/bun"
+
+	"quiz-log/db"
+	"quiz-log/graph/model"
+	"quiz-log/repository"
 )
 
 type QuizService struct {
 	DB   *bun.DB
-	Repo *repository.QuizRepository
+	Repo repository.QuizRepository
 }
 
 func NewQuizService(database *bun.DB) *QuizService {

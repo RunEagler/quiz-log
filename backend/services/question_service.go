@@ -4,16 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"quiz-log/db"
-	"quiz-log/graph/model"
-	"quiz-log/repository"
 	"strconv"
 
 	"github.com/uptrace/bun"
+
+	"quiz-log/graph/model"
+	"quiz-log/repository"
 )
 
 type QuestionService struct {
 	DB   *bun.DB
-	Repo *repository.QuestionRepository
+	Repo repository.QuestionRepository
 }
 
 func NewQuestionService(database *bun.DB) *QuestionService {

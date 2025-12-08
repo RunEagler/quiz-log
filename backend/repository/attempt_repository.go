@@ -8,16 +8,30 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type AttemptRepository struct {
+//go:generate mockgen -destination=mocks/mock_attempt_repository.go -package=mocks quiz-log/repository AttemptRepository
+
+// AttemptRepository defines the interface for attempt repository operations
+type AttemptRepository interface {
+	Create(ctx context.Context, quizID int, startedAt, completedAt time.Time, score, totalQuestions int) (int, error)
+	UpdateScore(ctx context.Context, attemptID, score int) error
+	CountQuestionsByQuizID(ctx context.Context, quizID int) (int, error)
+	GetCorrectAnswer(ctx context.Context, questionID int) (string, error)
+	CreateAnswer(ctx context.Context, attemptID, questionID int, userAnswer string, isCorrect bool) error
+	FindByID(ctx context.Context, attemptID int) (*db.Attempt, error)
+	FindAll(ctx context.Context, quizID *int) ([]*db.Attempt, error)
+	FindAnswersByAttemptID(ctx context.Context, attemptID int) ([]*db.Answer, error)
+}
+
+type attemptRepository struct {
 	DB *bun.DB
 }
 
-func NewAttemptRepository(database *bun.DB) *AttemptRepository {
-	return &AttemptRepository{DB: database}
+func NewAttemptRepository(database *bun.DB) AttemptRepository {
+	return &attemptRepository{DB: database}
 }
 
 // Create creates a new attempt and returns its ID
-func (r *AttemptRepository) Create(ctx context.Context, quizID int, startedAt, completedAt time.Time, score, totalQuestions int) (int, error) {
+func (r *attemptRepository) Create(ctx context.Context, quizID int, startedAt, completedAt time.Time, score, totalQuestions int) (int, error) {
 	var attemptID int
 
 	query := psql.Insert("attempts").
@@ -25,12 +39,7 @@ func (r *AttemptRepository) Create(ctx context.Context, quizID int, startedAt, c
 		Values(quizID, startedAt, completedAt, score, totalQuestions).
 		Suffix("RETURNING id")
 
-	sqlStr, args, err := query.ToSql()
-	if err != nil {
-		return 0, err
-	}
-
-	err = r.DB.QueryRowContext(ctx, sqlStr, args...).Scan(&attemptID)
+	err := ExecQueryWithReturning[int](ctx, r.DB, query, &attemptID)
 	if err != nil {
 		return 0, err
 	}
@@ -39,22 +48,20 @@ func (r *AttemptRepository) Create(ctx context.Context, quizID int, startedAt, c
 }
 
 // UpdateScore updates the score of an attempt
-func (r *AttemptRepository) UpdateScore(ctx context.Context, attemptID, score int) error {
+func (r *attemptRepository) UpdateScore(ctx context.Context, attemptID, score int) error {
 	query := psql.Update("attempts").
 		Set("score", score).
 		Where("id = ?", attemptID)
 
-	sqlStr, args, err := query.ToSql()
+	_, err := ExecQuery(ctx, r.DB, query)
 	if err != nil {
 		return err
 	}
-
-	_, err = r.DB.ExecContext(ctx, sqlStr, args...)
-	return err
+	return nil
 }
 
 // CountQuestionsByQuizID counts questions for a quiz
-func (r *AttemptRepository) CountQuestionsByQuizID(ctx context.Context, quizID int) (int, error) {
+func (r *attemptRepository) CountQuestionsByQuizID(ctx context.Context, quizID int) (int, error) {
 	var count int
 
 	query := psql.Select("COUNT(*)").
@@ -66,64 +73,55 @@ func (r *AttemptRepository) CountQuestionsByQuizID(ctx context.Context, quizID i
 		return 0, err
 	}
 
-	err = r.DB.QueryRowContext(ctx, sqlStr, args...).Scan(&count)
-	return count, err
+	err = r.DB.DB.QueryRowContext(ctx, sqlStr, args...).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 // GetCorrectAnswer retrieves the correct answer for a question
-func (r *AttemptRepository) GetCorrectAnswer(ctx context.Context, questionID int) (string, error) {
+func (r *attemptRepository) GetCorrectAnswer(ctx context.Context, questionID int) (string, error) {
 	var correctAnswer string
 
 	query := psql.Select("correct_answer").
 		From("questions").
 		Where("id = ?", questionID)
 
-	sqlStr, args, err := query.ToSql()
+	err := ExecQueryWithReturning[string](ctx, r.DB, query, &correctAnswer)
 	if err != nil {
 		return "", err
 	}
 
-	err = r.DB.QueryRowContext(ctx, sqlStr, args...).Scan(&correctAnswer)
-	return correctAnswer, err
+	return correctAnswer, nil
 }
 
 // CreateAnswer creates a new answer record
-func (r *AttemptRepository) CreateAnswer(ctx context.Context, attemptID, questionID int, userAnswer string, isCorrect bool) error {
+func (r *attemptRepository) CreateAnswer(ctx context.Context, attemptID, questionID int, userAnswer string, isCorrect bool) error {
 	query := psql.Insert("answers").
 		Columns("attempt_id", "question_id", "user_answer", "is_correct").
 		Values(attemptID, questionID, userAnswer, isCorrect)
 
-	sqlStr, args, err := query.ToSql()
+	_, err := ExecQuery(ctx, r.DB, query)
 	if err != nil {
 		return err
 	}
 
-	_, err = r.DB.ExecContext(ctx, sqlStr, args...)
-	return err
+	return nil
 }
 
 // FindByID retrieves an attempt by its ID
-func (r *AttemptRepository) FindByID(ctx context.Context, attemptID int) (*db.Attempt, error) {
+func (r *attemptRepository) FindByID(ctx context.Context, attemptID int) (*db.Attempt, error) {
 	query := psql.Select("id", "quiz_id", "started_at", "completed_at", "score", "total_questions").
 		From("attempts").
 		Where("id = ?", attemptID)
 
-	sqlStr, args, err := query.ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	var attempt db.Attempt
-	err = r.DB.NewRaw(sqlStr, args...).Scan(ctx, &attempt)
-	if err != nil {
-		return nil, err
-	}
-
-	return &attempt, nil
+	return FindOne[db.Attempt](ctx, r.DB, query)
 }
 
 // FindAll retrieves attempts, optionally filtered by quiz ID
-func (r *AttemptRepository) FindAll(ctx context.Context, quizID *int) ([]*db.Attempt, error) {
+func (r *attemptRepository) FindAll(ctx context.Context, quizID *int) ([]*db.Attempt, error) {
 	queryBuilder := psql.Select("id", "quiz_id", "started_at", "completed_at", "score", "total_questions").
 		From("attempts")
 
@@ -133,57 +131,15 @@ func (r *AttemptRepository) FindAll(ctx context.Context, quizID *int) ([]*db.Att
 
 	queryBuilder = queryBuilder.OrderBy("started_at DESC")
 
-	sqlStr, args, err := queryBuilder.ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.DB.QueryContext(ctx, sqlStr, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var attempts []*db.Attempt
-	for rows.Next() {
-		var attempt db.Attempt
-		err := r.DB.ScanRows(ctx, rows, &attempt)
-		if err != nil {
-			return nil, err
-		}
-		attempts = append(attempts, &attempt)
-	}
-
-	return attempts, nil
+	return FindAll[db.Attempt](ctx, r.DB, queryBuilder)
 }
 
 // FindAnswersByAttemptID retrieves all answers for an attempt
-func (r *AttemptRepository) FindAnswersByAttemptID(ctx context.Context, attemptID int) ([]*db.Answer, error) {
+func (r *attemptRepository) FindAnswersByAttemptID(ctx context.Context, attemptID int) ([]*db.Answer, error) {
 	query := psql.Select("id", "attempt_id", "question_id", "user_answer", "is_correct").
 		From("answers").
 		Where("attempt_id = ?", attemptID).
 		OrderBy("id ASC")
 
-	sqlStr, args, err := query.ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.DB.QueryContext(ctx, sqlStr, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var answers []*db.Answer
-	for rows.Next() {
-		var answer db.Answer
-		err := r.DB.ScanRows(ctx, rows, &answer)
-		if err != nil {
-			return nil, err
-		}
-		answers = append(answers, &answer)
-	}
-
-	return answers, nil
+	return FindAll[db.Answer](ctx, r.DB, query)
 }

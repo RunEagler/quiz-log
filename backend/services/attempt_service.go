@@ -13,7 +13,7 @@ import (
 
 type AttemptService struct {
 	DB              *bun.DB
-	Repo            *repository.AttemptRepository
+	Repo            repository.AttemptRepository
 	QuestionService *QuestionService
 }
 

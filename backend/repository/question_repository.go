@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"quiz-log/db"
+	"quiz-log/models"
 	"strconv"
 
 	"github.com/lib/pq"
@@ -16,10 +16,10 @@ type QuestionRepository interface {
 	Create(ctx context.Context, quizID, questionType, content string, options []string, correctAnswer string, explanation *string, difficulty string) (int, error)
 	Update(ctx context.Context, id int, questionType *string, content *string, options []string, correctAnswer *string, explanation *string, difficulty *string) error
 	Delete(ctx context.Context, id int) error
-	FindAll(ctx context.Context, quizID *int) ([]*db.Question, error)
-	FindByID(ctx context.Context, id int) (*db.Question, error)
-	FindWrongQuestions(ctx context.Context) ([]*db.Question, error)
-	FindTagsByQuestionID(ctx context.Context, questionID int) ([]*db.Tag, error)
+	FindAll(ctx context.Context, quizID *int) ([]*models.Question, error)
+	FindByID(ctx context.Context, id int) (*models.Question, error)
+	FindWrongQuestions(ctx context.Context) ([]*models.Question, error)
+	FindTagsByQuestionID(ctx context.Context, questionID int) ([]*models.Tag, error)
 	AssociateTags(ctx context.Context, questionID int, tagIDs []string) error
 	ClearTags(ctx context.Context, questionID int) error
 }
@@ -112,7 +112,7 @@ func (r *questionRepository) Delete(ctx context.Context, id int) error {
 }
 
 // FindAll retrieves all questions, optionally filtered by quiz ID
-func (r *questionRepository) FindAll(ctx context.Context, quizID *int) ([]*db.Question, error) {
+func (r *questionRepository) FindAll(ctx context.Context, quizID *int) ([]*models.Question, error) {
 	queryBuilder := psql.Select("id", "quiz_id", "type", "content", "options", "correct_answer", "explanation", "difficulty", "created_at", "updated_at").
 		From("questions")
 
@@ -122,38 +122,38 @@ func (r *questionRepository) FindAll(ctx context.Context, quizID *int) ([]*db.Qu
 
 	queryBuilder = queryBuilder.OrderBy("created_at ASC")
 
-	return FindAll[db.Question](ctx, r.DB, queryBuilder)
+	return FindAll[models.Question](ctx, r.DB, queryBuilder)
 }
 
 // FindByID retrieves a question by its ID
-func (r *questionRepository) FindByID(ctx context.Context, id int) (*db.Question, error) {
+func (r *questionRepository) FindByID(ctx context.Context, id int) (*models.Question, error) {
 	query := psql.Select("id", "quiz_id", "type", "content", "options", "correct_answer", "explanation", "difficulty", "created_at", "updated_at").
 		From("questions").
 		Where("id = ?", id)
 
-	return FindOne[db.Question](ctx, r.DB, query)
+	return FindOne[models.Question](ctx, r.DB, query)
 }
 
 // FindWrongQuestions retrieves questions that were answered incorrectly
-func (r *questionRepository) FindWrongQuestions(ctx context.Context) ([]*db.Question, error) {
+func (r *questionRepository) FindWrongQuestions(ctx context.Context) ([]*models.Question, error) {
 	query := psql.Select("DISTINCT q.id", "q.quiz_id", "q.type", "q.content", "q.options", "q.correct_answer", "q.explanation", "q.difficulty", "q.created_at", "q.updated_at").
 		From("questions q").
 		Join("answers a ON q.id = a.question_id").
 		Where("a.is_correct = false").
 		OrderBy("q.created_at DESC")
 
-	return FindAll[db.Question](ctx, r.DB, query)
+	return FindAll[models.Question](ctx, r.DB, query)
 }
 
 // FindTagsByQuestionID retrieves all tags for a question
-func (r *questionRepository) FindTagsByQuestionID(ctx context.Context, questionID int) ([]*db.Tag, error) {
+func (r *questionRepository) FindTagsByQuestionID(ctx context.Context, questionID int) ([]*models.Tag, error) {
 	query := psql.Select("t.id", "t.name").
 		From("tags t").
 		Join("question_tags qt ON t.id = qt.tag_id").
 		Where("qt.question_id = ?", questionID).
 		OrderBy("t.name ASC")
 
-	return FindAll[db.Tag](ctx, r.DB, query)
+	return FindAll[models.Tag](ctx, r.DB, query)
 }
 
 // AssociateTags associates tags with a question

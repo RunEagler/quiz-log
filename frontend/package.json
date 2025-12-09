@@ -11,10 +11,7 @@
     "relay-runtime": "^20.1.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^6.1.0",
-    "@graphql-codegen/typescript": "^5.0.6",
-    "@graphql-codegen/typescript-operations": "^5.0.6",
-    "@graphql-codegen/typescript-react-apollo": "^4.3.3",
+    "@biomejs/biome": "^2.3.8",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@types/react-relay": "^18.2.1",
@@ -30,6 +27,12 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "relay": "relay-compiler",
-    "codegen": "pnpm run relay"
+    "codegen": "pnpm run relay",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "format": "biome format ./src",
+    "format:fix": "biome format --write ./src",
+    "check": "biome check ./src",
+    "check:fix": "biome check --write ./src"
   }
 }

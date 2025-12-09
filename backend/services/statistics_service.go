@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
-	"quiz-log/graph/model"
-	"quiz-log/repository"
 
 	"github.com/uptrace/bun"
+
+	"quiz-log/graph/model"
+	"quiz-log/repository"
 )
 
 type StatisticsService struct {

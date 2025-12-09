@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"quiz-log/db"
+	"quiz-log/models"
 	"time"
 
 	"github.com/uptrace/bun"
@@ -17,9 +17,9 @@ type AttemptRepository interface {
 	CountQuestionsByQuizID(ctx context.Context, quizID int) (int, error)
 	GetCorrectAnswer(ctx context.Context, questionID int) (string, error)
 	CreateAnswer(ctx context.Context, attemptID, questionID int, userAnswer string, isCorrect bool) error
-	FindByID(ctx context.Context, attemptID int) (*db.Attempt, error)
-	FindAll(ctx context.Context, quizID *int) ([]*db.Attempt, error)
-	FindAnswersByAttemptID(ctx context.Context, attemptID int) ([]*db.Answer, error)
+	FindByID(ctx context.Context, attemptID int) (*models.Attempt, error)
+	FindAll(ctx context.Context, quizID *int) ([]*models.Attempt, error)
+	FindAnswersByAttemptID(ctx context.Context, attemptID int) ([]*models.Answer, error)
 }
 
 type attemptRepository struct {
@@ -112,16 +112,16 @@ func (r *attemptRepository) CreateAnswer(ctx context.Context, attemptID, questio
 }
 
 // FindByID retrieves an attempt by its ID
-func (r *attemptRepository) FindByID(ctx context.Context, attemptID int) (*db.Attempt, error) {
+func (r *attemptRepository) FindByID(ctx context.Context, attemptID int) (*models.Attempt, error) {
 	query := psql.Select("id", "quiz_id", "started_at", "completed_at", "score", "total_questions").
 		From("attempts").
 		Where("id = ?", attemptID)
 
-	return FindOne[db.Attempt](ctx, r.DB, query)
+	return FindOne[models.Attempt](ctx, r.DB, query)
 }
 
 // FindAll retrieves attempts, optionally filtered by quiz ID
-func (r *attemptRepository) FindAll(ctx context.Context, quizID *int) ([]*db.Attempt, error) {
+func (r *attemptRepository) FindAll(ctx context.Context, quizID *int) ([]*models.Attempt, error) {
 	queryBuilder := psql.Select("id", "quiz_id", "started_at", "completed_at", "score", "total_questions").
 		From("attempts")
 
@@ -131,15 +131,15 @@ func (r *attemptRepository) FindAll(ctx context.Context, quizID *int) ([]*db.Att
 
 	queryBuilder = queryBuilder.OrderBy("started_at DESC")
 
-	return FindAll[db.Attempt](ctx, r.DB, queryBuilder)
+	return FindAll[models.Attempt](ctx, r.DB, queryBuilder)
 }
 
 // FindAnswersByAttemptID retrieves all answers for an attempt
-func (r *attemptRepository) FindAnswersByAttemptID(ctx context.Context, attemptID int) ([]*db.Answer, error) {
+func (r *attemptRepository) FindAnswersByAttemptID(ctx context.Context, attemptID int) ([]*models.Answer, error) {
 	query := psql.Select("id", "attempt_id", "question_id", "user_answer", "is_correct").
 		From("answers").
 		Where("attempt_id = ?", attemptID).
 		OrderBy("id ASC")
 
-	return FindAll[db.Answer](ctx, r.DB, query)
+	return FindAll[models.Answer](ctx, r.DB, query)
 }

@@ -1,3 +1,16 @@
+---
+subagent: true
+name: backend
+description: Backend development specialist for Go, GraphQL (gqlgen), PostgreSQL, and API development
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+---
+
 # Backend Development Agent
 
 You are a backend development specialist for the Quiz Log application.
@@ -102,112 +115,6 @@ Environment variables (defined in `.env`):
 
 Migration configuration: `dbconfig.yml`
 
-## Best Practices
-
-### Resolver Organization
-```go
-// graph/resolvers/quiz.go
-package resolvers
-
-import (
-    "context"
-    "database/sql"
-    "github.com/yourusername/quiz-log/graph/model"
-)
-
-// Quizzes returns all quizzes
-func (r *queryResolver) Quizzes(ctx context.Context) ([]*model.Quiz, error) {
-    rows, err := r.DB.QueryContext(ctx, `
-        SELECT id, title, description, created_at, updated_at
-        FROM quizzes
-        ORDER BY created_at DESC
-    `)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-
-    var quizzes []*model.Quiz
-    for rows.Next() {
-        var q model.Quiz
-        if err := rows.Scan(&q.ID, &q.Title, &q.Description, &q.CreatedAt, &q.UpdatedAt); err != nil {
-            return nil, err
-        }
-        quizzes = append(quizzes, &q)
-    }
-    return quizzes, nil
-}
-```
-
-### Input Validation
-```go
-func (r *mutationResolver) CreateQuiz(ctx context.Context, input model.CreateQuizInput) (*model.Quiz, error) {
-    // Validate input
-    if input.Title == "" {
-        return nil, fmt.Errorf("title is required")
-    }
-    if len(input.Title) > 255 {
-        return nil, fmt.Errorf("title too long")
-    }
-
-    // Perform operation
-    // ...
-}
-```
-
-### Transactions
-```go
-func (r *mutationResolver) SubmitQuizAttempt(ctx context.Context, input model.SubmitQuizAttemptInput) (*model.QuizAttempt, error) {
-    tx, err := r.DB.BeginTx(ctx, nil)
-    if err != nil {
-        return nil, err
-    }
-    defer tx.Rollback()
-
-    // Multiple operations...
-
-    if err := tx.Commit(); err != nil {
-        return nil, err
-    }
-    return attempt, nil
-}
-```
-
-### Error Handling
-```go
-func (r *queryResolver) Quiz(ctx context.Context, id string) (*model.Quiz, error) {
-    var q model.Quiz
-    err := r.DB.QueryRowContext(ctx, `
-        SELECT id, title, description, created_at, updated_at
-        FROM quizzes WHERE id = $1
-    `, id).Scan(&q.ID, &q.Title, &q.Description, &q.CreatedAt, &q.UpdatedAt)
-
-    if err == sql.ErrNoRows {
-        return nil, fmt.Errorf("quiz not found")
-    }
-    if err != nil {
-        return nil, fmt.Errorf("database error: %w", err)
-    }
-    return &q, nil
-}
-```
-
-### Migration File Format
-```sql
--- +migrate Up
-CREATE TABLE quizzes (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_quizzes_created_at ON quizzes(created_at);
-
--- +migrate Down
-DROP TABLE quizzes;
-```
 
 ## Development Guidelines
 
@@ -221,44 +128,6 @@ DROP TABLE quizzes;
 8. **Context usage** - Pass context to all database operations
 9. **Transactions** - Use transactions for multi-step operations
 10. **Testing** - Test via GraphQL playground before marking complete
-
-## Common GraphQL Patterns
-
-### Query with Arguments
-```graphql
-type Query {
-  quiz(id: ID!): Quiz
-  quizzes(tag: String, difficulty: Difficulty): [Quiz!]!
-}
-```
-
-### Mutation with Input Type
-```graphql
-input CreateQuizInput {
-  title: String!
-  description: String
-  tagIDs: [ID!]
-}
-
-type Mutation {
-  createQuiz(input: CreateQuizInput!): Quiz!
-}
-```
-
-### Enums
-```graphql
-enum QuestionType {
-  MULTIPLE_CHOICE
-  TRUE_FALSE
-  SHORT_ANSWER
-}
-
-enum Difficulty {
-  EASY
-  MEDIUM
-  HARD
-}
-```
 
 ## Database Schema
 

@@ -3,12 +3,13 @@ package services
 import (
 	"context"
 	"quiz-log/db"
-	"quiz-log/graph/model"
-	"quiz-log/repository"
 	"strconv"
 	"time"
 
 	"github.com/uptrace/bun"
+
+	"quiz-log/graph/model"
+	"quiz-log/repository"
 )
 
 type AttemptService struct {

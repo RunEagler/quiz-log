@@ -2,14 +2,14 @@ package services
 
 import (
 	"context"
+	"quiz-log/models"
 	"testing"
 	"time"
 
-	"quiz-log/db"
+	"go.uber.org/mock/gomock"
+
 	"quiz-log/graph/model"
 	mocks "quiz-log/repository/mocks"
-
-	"go.uber.org/mock/gomock"
 )
 
 func TestQuizService_CreateQuiz(t *testing.T) {
@@ -43,7 +43,7 @@ func TestQuizService_CreateQuiz(t *testing.T) {
 		Return(nil)
 
 	// Expect FindByID to be called
-	expectedQuiz := &db.Quiz{
+	expectedQuiz := &models.Quiz{
 		ID:          expectedQuizID,
 		Title:       input.Title,
 		Description: input.Description,
@@ -111,7 +111,7 @@ func TestQuizService_UpdateQuiz(t *testing.T) {
 		Return(nil)
 
 	// Expect FindByID to be called
-	expectedQuiz := &db.Quiz{
+	expectedQuiz := &models.Quiz{
 		ID:          1,
 		Title:       *input.Title,
 		Description: input.Description,
@@ -182,7 +182,7 @@ func TestQuizService_GetAllQuizzes(t *testing.T) {
 	createdAt := time.Now()
 	updatedAt := time.Now()
 
-	expectedQuizzes := []*db.Quiz{
+	expectedQuizzes := []*models.Quiz{
 		{
 			ID:        1,
 			Title:     "Quiz 1",
@@ -233,7 +233,7 @@ func TestQuizService_GetQuizByID(t *testing.T) {
 	createdAt := time.Now()
 	updatedAt := time.Now()
 
-	expectedQuiz := &db.Quiz{
+	expectedQuiz := &models.Quiz{
 		ID:          1,
 		Title:       "Test Quiz",
 		Description: stringPtr("Test Description"),
@@ -277,7 +277,7 @@ func TestQuizService_GetQuestionsByQuizID(t *testing.T) {
 	createdAt := time.Now()
 	updatedAt := time.Now()
 
-	expectedQuestions := []*db.Question{
+	expectedQuestions := []*models.Question{
 		{
 			ID:            1,
 			QuizID:        1,
@@ -325,7 +325,7 @@ func TestQuizService_GetTagsByQuizID(t *testing.T) {
 	ctx := context.Background()
 	quizID := "1"
 
-	expectedTags := []*db.Tag{
+	expectedTags := []*models.Tag{
 		{ID: 1, Name: "Tag1"},
 		{ID: 2, Name: "Tag2"},
 	}

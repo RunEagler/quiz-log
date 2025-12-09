@@ -2,5 +2,6 @@
   "src": "./src",
   "schema": "../shared/schema/schema.graphql",
   "language": "typescript",
-  "exclude": ["**/node_modules/**", "**/__generated__/**"]
+  "exclude": ["**/node_modules/**", "**/__generated__/**"],
+  "artifactDirectory": "./src/components/__generated__"
 }

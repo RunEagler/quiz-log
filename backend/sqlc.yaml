@@ -1,0 +1,14 @@
+version: "2"
+sql:
+  - schema: "db/migrations"
+    queries: "db/queries"
+    engine: "postgresql"
+    gen:
+      go:
+        package: "model"
+        out: "db/model"
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_interface: false
+        emit_empty_slices: true
+        emit_pointers_for_null_types: true

@@ -1,12 +1,14 @@
 package db
 
 import (
-	"quiz-log/graph/model"
 	"strconv"
+	
+	"quiz-log/graph/model"
+	"quiz-log/models"
 )
 
 // QuizToGraphQL converts a db.Quiz to a GraphQL model.Quiz
-func QuizToGraphQL(q *Quiz) *model.Quiz {
+func QuizToGraphQL(q *models.Quiz) *model.Quiz {
 	return &model.Quiz{
 		ID:          strconv.Itoa(q.ID),
 		Title:       q.Title,
@@ -17,7 +19,7 @@ func QuizToGraphQL(q *Quiz) *model.Quiz {
 }
 
 // TagToGraphQL converts a db.Tag to a GraphQL model.Tag
-func TagToGraphQL(t *Tag) *model.Tag {
+func TagToGraphQL(t *models.Tag) *model.Tag {
 	return &model.Tag{
 		ID:   strconv.Itoa(t.ID),
 		Name: t.Name,
@@ -25,10 +27,15 @@ func TagToGraphQL(t *Tag) *model.Tag {
 }
 
 // QuestionToGraphQL converts a db.Question to a GraphQL model.Question
-func QuestionToGraphQL(q *Question) *model.Question {
+func QuestionToGraphQL(q *models.Question) *model.Question {
+	var quizID string
+	if q.QuizID != nil {
+		quizID = strconv.Itoa(*q.QuizID)
+	}
+
 	return &model.Question{
 		ID:            strconv.Itoa(q.ID),
-		QuizID:        strconv.Itoa(q.QuizID),
+		QuizID:        quizID,
 		Type:          model.QuestionType(q.Type),
 		Content:       q.Content,
 		Options:       q.Options,
@@ -41,10 +48,15 @@ func QuestionToGraphQL(q *Question) *model.Question {
 }
 
 // AttemptToGraphQL converts a db.Attempt to a GraphQL model.Attempt
-func AttemptToGraphQL(a *Attempt) *model.Attempt {
+func AttemptToGraphQL(a *models.Attempt) *model.Attempt {
+	var quizID string
+	if a.QuizID != nil {
+		quizID = strconv.Itoa(*a.QuizID)
+	}
+
 	return &model.Attempt{
 		ID:             strconv.Itoa(a.ID),
-		QuizID:         strconv.Itoa(a.QuizID),
+		QuizID:         quizID,
 		StartedAt:      a.StartedAt,
 		CompletedAt:    a.CompletedAt,
 		Score:          a.Score,
@@ -53,11 +65,19 @@ func AttemptToGraphQL(a *Attempt) *model.Attempt {
 }
 
 // AnswerToGraphQL converts a db.Answer to a GraphQL model.Answer
-func AnswerToGraphQL(a *Answer) *model.Answer {
+func AnswerToGraphQL(a *models.Answer) *model.Answer {
+	var attemptID, questionID string
+	if a.AttemptID != nil {
+		attemptID = strconv.Itoa(*a.AttemptID)
+	}
+	if a.QuestionID != nil {
+		questionID = strconv.Itoa(*a.QuestionID)
+	}
+
 	return &model.Answer{
 		ID:         strconv.Itoa(a.ID),
-		AttemptID:  strconv.Itoa(a.AttemptID),
-		QuestionID: strconv.Itoa(a.QuestionID),
+		AttemptID:  attemptID,
+		QuestionID: questionID,
 		UserAnswer: a.UserAnswer,
 		IsCorrect:  a.IsCorrect,
 	}

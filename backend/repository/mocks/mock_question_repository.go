@@ -11,7 +11,7 @@ package mocks
 
 import (
 	context "context"
-	db "quiz-log/db"
+	"quiz-log/models"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -99,10 +99,10 @@ func (mr *MockQuestionRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 }
 
 // FindAll mocks base method.
-func (m *MockQuestionRepository) FindAll(ctx context.Context, quizID *int) ([]*db.Question, error) {
+func (m *MockQuestionRepository) FindAll(ctx context.Context, quizID *int) ([]*models.Question, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ctx, quizID)
-	ret0, _ := ret[0].([]*db.Question)
+	ret0, _ := ret[0].([]*models.Question)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -114,10 +114,10 @@ func (mr *MockQuestionRepositoryMockRecorder) FindAll(ctx, quizID any) *gomock.C
 }
 
 // FindByID mocks base method.
-func (m *MockQuestionRepository) FindByID(ctx context.Context, id int) (*db.Question, error) {
+func (m *MockQuestionRepository) FindByID(ctx context.Context, id int) (*models.Question, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", ctx, id)
-	ret0, _ := ret[0].(*db.Question)
+	ret0, _ := ret[0].(*models.Question)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -129,10 +129,10 @@ func (mr *MockQuestionRepositoryMockRecorder) FindByID(ctx, id any) *gomock.Call
 }
 
 // FindTagsByQuestionID mocks base method.
-func (m *MockQuestionRepository) FindTagsByQuestionID(ctx context.Context, questionID int) ([]*db.Tag, error) {
+func (m *MockQuestionRepository) FindTagsByQuestionID(ctx context.Context, questionID int) ([]*models.Tag, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindTagsByQuestionID", ctx, questionID)
-	ret0, _ := ret[0].([]*db.Tag)
+	ret0, _ := ret[0].([]*models.Tag)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -144,10 +144,10 @@ func (mr *MockQuestionRepositoryMockRecorder) FindTagsByQuestionID(ctx, question
 }
 
 // FindWrongQuestions mocks base method.
-func (m *MockQuestionRepository) FindWrongQuestions(ctx context.Context) ([]*db.Question, error) {
+func (m *MockQuestionRepository) FindWrongQuestions(ctx context.Context) ([]*models.Question, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindWrongQuestions", ctx)
-	ret0, _ := ret[0].([]*db.Question)
+	ret0, _ := ret[0].([]*models.Question)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

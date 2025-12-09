@@ -11,7 +11,7 @@ package mocks
 
 import (
 	context "context"
-	db "quiz-log/db"
+	db "quiz-log/models"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"

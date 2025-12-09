@@ -2,15 +2,20 @@ package services
 
 import (
 	"context"
+	"quiz-log/models"
 	"testing"
 	"time"
 
-	"quiz-log/db"
+	"go.uber.org/mock/gomock"
+
 	"quiz-log/graph/model"
 	mocks "quiz-log/repository/mocks"
-
-	"go.uber.org/mock/gomock"
 )
+
+// Helper function to convert int to *int
+func intPtr(i int) *int {
+	return &i
+}
 
 func TestAttemptService_SubmitAttempt(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -79,9 +84,9 @@ func TestAttemptService_SubmitAttempt(t *testing.T) {
 	// Expect FindByID to be called
 	mockAttemptRepo.EXPECT().
 		FindByID(ctx, attemptID).
-		Return(&db.Attempt{
+		Return(&models.Attempt{
 			ID:             attemptID,
-			QuizID:         1,
+			QuizID:         intPtr(1),
 			StartedAt:      startTime,
 			CompletedAt:    &startTime,
 			Score:          50,
@@ -91,9 +96,9 @@ func TestAttemptService_SubmitAttempt(t *testing.T) {
 	// Expect GetQuestionByID for wrong question
 	mockQuestionRepo.EXPECT().
 		FindByID(ctx, 2).
-		Return(&db.Question{
+		Return(&models.Question{
 			ID:            2,
-			QuizID:        1,
+			QuizID:        intPtr(1),
 			Type:          "MULTIPLE_CHOICE",
 			Content:       "What is the capital of Japan?",
 			Options:       []string{"Tokyo", "London", "Paris"},
@@ -146,7 +151,7 @@ func TestAttemptService_GetAttempts(t *testing.T) {
 	quizIDInt := 1
 	startTime := time.Now()
 
-	expectedAttempts := []*db.Attempt{
+	expectedAttempts := []*models.Attempt{
 		{
 			ID:             1,
 			QuizID:         quizIDInt,
@@ -203,7 +208,7 @@ func TestAttemptService_GetAttempts_WithoutFilter(t *testing.T) {
 	ctx := context.Background()
 	startTime := time.Now()
 
-	expectedAttempts := []*db.Attempt{
+	expectedAttempts := []*models.Attempt{
 		{
 			ID:             1,
 			QuizID:         1,
@@ -244,7 +249,7 @@ func TestAttemptService_GetAnswersByAttemptID(t *testing.T) {
 	ctx := context.Background()
 	attemptID := "1"
 
-	expectedAnswers := []*db.Answer{
+	expectedAnswers := []*models.Answer{
 		{
 			ID:         1,
 			AttemptID:  1,

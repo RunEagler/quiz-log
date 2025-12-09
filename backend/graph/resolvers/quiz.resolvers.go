@@ -7,11 +7,10 @@ package resolvers
 
 import (
 	"context"
-	"strconv"
-
 	"quiz-log/dataloader"
 	"quiz-log/graph"
 	"quiz-log/graph/model"
+	"strconv"
 )
 
 // CreateQuiz is the resolver for the createQuiz field.

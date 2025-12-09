@@ -11,7 +11,7 @@ package mocks
 
 import (
 	context "context"
-	db "quiz-log/db"
+	"quiz-log/models"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -99,10 +99,10 @@ func (mr *MockQuizRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 }
 
 // FindAll mocks base method.
-func (m *MockQuizRepository) FindAll(ctx context.Context) ([]*db.Quiz, error) {
+func (m *MockQuizRepository) FindAll(ctx context.Context) ([]*models.Quiz, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ctx)
-	ret0, _ := ret[0].([]*db.Quiz)
+	ret0, _ := ret[0].([]*models.Quiz)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -114,10 +114,10 @@ func (mr *MockQuizRepositoryMockRecorder) FindAll(ctx any) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockQuizRepository) FindByID(ctx context.Context, id int) (*db.Quiz, error) {
+func (m *MockQuizRepository) FindByID(ctx context.Context, id int) (*models.Quiz, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", ctx, id)
-	ret0, _ := ret[0].(*db.Quiz)
+	ret0, _ := ret[0].(*models.Quiz)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -129,10 +129,10 @@ func (mr *MockQuizRepositoryMockRecorder) FindByID(ctx, id any) *gomock.Call {
 }
 
 // FindQuestionsByQuizID mocks base method.
-func (m *MockQuizRepository) FindQuestionsByQuizID(ctx context.Context, quizID int) ([]*db.Question, error) {
+func (m *MockQuizRepository) FindQuestionsByQuizID(ctx context.Context, quizID int) ([]*models.Question, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindQuestionsByQuizID", ctx, quizID)
-	ret0, _ := ret[0].([]*db.Question)
+	ret0, _ := ret[0].([]*models.Question)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -144,10 +144,10 @@ func (mr *MockQuizRepositoryMockRecorder) FindQuestionsByQuizID(ctx, quizID any)
 }
 
 // FindQuestionsByQuizIDs mocks base method.
-func (m *MockQuizRepository) FindQuestionsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*db.Question, error) {
+func (m *MockQuizRepository) FindQuestionsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*models.Question, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindQuestionsByQuizIDs", ctx, quizIDs)
-	ret0, _ := ret[0].(map[int][]*db.Question)
+	ret0, _ := ret[0].(map[int][]*models.Question)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -159,10 +159,10 @@ func (mr *MockQuizRepositoryMockRecorder) FindQuestionsByQuizIDs(ctx, quizIDs an
 }
 
 // FindTagsByQuizID mocks base method.
-func (m *MockQuizRepository) FindTagsByQuizID(ctx context.Context, quizID int) ([]*db.Tag, error) {
+func (m *MockQuizRepository) FindTagsByQuizID(ctx context.Context, quizID int) ([]*models.Tag, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindTagsByQuizID", ctx, quizID)
-	ret0, _ := ret[0].([]*db.Tag)
+	ret0, _ := ret[0].([]*models.Tag)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -174,10 +174,10 @@ func (mr *MockQuizRepositoryMockRecorder) FindTagsByQuizID(ctx, quizID any) *gom
 }
 
 // FindTagsByQuizIDs mocks base method.
-func (m *MockQuizRepository) FindTagsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*db.Tag, error) {
+func (m *MockQuizRepository) FindTagsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*models.Tag, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindTagsByQuizIDs", ctx, quizIDs)
-	ret0, _ := ret[0].(map[int][]*db.Tag)
+	ret0, _ := ret[0].(map[int][]*models.Tag)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

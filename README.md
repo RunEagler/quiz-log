@@ -1,149 +1,149 @@
 # Quiz Log
 
-学んだことを復習するためのクイズ作成アプリ
+A quiz creation app for reviewing what you've learned
 
-## 機能
+## Features
 
-### 基本機能
-- クイズの作成・編集・削除
-- 問題の作成（選択式、記述式、正誤問題）
-- クイズの実施と採点
+### Core Features
+- Create, edit, and delete quizzes
+- Create questions (multiple choice, short answer, true/false)
+- Take quizzes and get scored results
 
-### 問題管理
-- タグ/カテゴリ分類
-- 難易度設定（Easy/Medium/Hard）
-- 問題のインポート/エクスポート（JSON形式）
+### Question Management
+- Tag/category classification
+- Difficulty settings (Easy/Medium/Hard)
+- Import/export questions (JSON format)
 
-### 学習管理
-- 学習履歴の記録
-- 正答率の追跡
-- 間違えた問題の復習機能
-- カテゴリ別統計
+### Learning Management
+- Record learning history
+- Track accuracy rates
+- Review incorrect questions
+- Category-based statistics
 
-## 技術スタック
+## Tech Stack
 
-### バックエンド
-- Go 1.21+
+### Backend
+- Go 1.25
 - gqlgen (GraphQL)
 - PostgreSQL
-- sql-migrate (マイグレーションツール)
+- sql-migrate (migration tool)
 
-### フロントエンド
+### Frontend
 - React 18
 - TypeScript
 - Relay (GraphQL Client)
 - React Router
 - Vite
 
-## セットアップ
+## Setup
 
-### 前提条件
-- Go 1.21以上
-- Node.js 18以上
-- PostgreSQL 14以上
+### Prerequisites
+- Go 1.21 or higher
+- Node.js 18 or higher
+- PostgreSQL 14 or higher
 
-### データベースのセットアップ
+### Database Setup
 
 ```bash
-# PostgreSQLデータベースを作成
+# Create PostgreSQL database
 createdb quizlog
 
-# マイグレーションを実行
+# Run migrations
 cd backend
 make migrate-up
 ```
 
-### バックエンドのセットアップ
+### Backend Setup
 
 ```bash
 cd backend
 
-# 依存関係のインストール
+# Install dependencies
 make install
 
-# 環境変数の設定
+# Configure environment variables
 cp .env.example .env
-# .envファイルを編集してデータベース接続情報を設定
+# Edit .env file to set database connection information
 
-# GraphQLコードの生成
+# Generate GraphQL code
 make generate
 
-# サーバーの起動
+# Start server
 make run
 ```
 
-サーバーは http://localhost:8080 で起動します。
+Server runs at http://localhost:8080
 GraphQL Playground: http://localhost:8080/
 
-### フロントエンドのセットアップ
+### Frontend Setup
 
 ```bash
 cd frontend
 
-# 依存関係のインストール
+# Install dependencies
 npm install
 
-# Relayコンパイラの実行
+# Run Relay compiler
 npm run relay
 
-# 開発サーバーの起動
+# Start development server
 npm run dev
 ```
 
-フロントエンドは http://localhost:5173 で起動します。
+Frontend runs at http://localhost:5173
 
-## 開発
+## Development
 
-### GraphQLスキーマの変更
+### Modifying GraphQL Schema
 
-1. `backend/graph/schema/schema.graphqls` を編集
-2. `cd backend && make generate` でコードを再生成
-3. `cd frontend && npm run relay` でRelayの型を再生成
+1. Edit `backend/graph/schema/schema.graphqls`
+2. Regenerate code with `cd backend && make generate`
+3. Regenerate Relay types with `cd frontend && npm run relay`
 
-### データベースマイグレーション
+### Database Migrations
 
-sql-migrateを使用してマイグレーションを管理しています。
+Migrations are managed using sql-migrate.
 
 ```bash
 cd backend
 
-# マイグレーションステータス確認
+# Check migration status
 make migrate-status
 
-# マイグレーション実行
+# Run migrations
 make migrate-up
 
-# マイグレーションロールバック
+# Rollback migrations
 make migrate-down
 
-# 新しいマイグレーション作成
+# Create new migration
 make migrate-new
-# または直接: sql-migrate new migration_name
+# Or directly: sql-migrate new migration_name
 ```
 
-新しいマイグレーションファイルは `backend/db/migrations/` に作成されます。
-sql-migrateの形式（`-- +migrate Up` と `-- +migrate Down`）に従ってください。
+New migration files are created in `backend/db/migrations/`.
+Follow the sql-migrate format (`-- +migrate Up` and `-- +migrate Down`).
 
-## プロジェクト構造
+## Project Structure
 
 ```
 quiz-log/
 ├── backend/
-│   ├── db/              # データベース接続とマイグレーション
-│   ├── graph/           # GraphQLスキーマとリゾルバ
-│   ├── server.go        # メインサーバー
+│   ├── db/              # Database connection and migrations
+│   ├── graph/           # GraphQL schema and resolvers
+│   ├── server.go        # Main server
 │   └── Makefile
 └── frontend/
     ├── src/
-    │   ├── components/  # Reactコンポーネント
+    │   ├── components/  # React components
     │   ├── App.tsx
     │   └── main.tsx
     └── package.json
 ```
 
-## 次のステップ
+## Next Steps
 
-1. リゾルバの実装（backend/graph/*.resolvers.go）
-2. フロントエンドコンポーネントの実装
-3. 問題のインポート/エクスポート機能
-4. 学習統計の可視化
+1. Implement resolvers (backend/graph/*.resolvers.go)
+2. Implement frontend components
+3. Question import/export functionality
+4. Learning statistics visualization

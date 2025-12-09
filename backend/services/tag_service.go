@@ -3,11 +3,12 @@ package services
 import (
 	"context"
 	"quiz-log/db"
-	"quiz-log/graph/model"
-	"quiz-log/repository"
 	"strconv"
 
 	"github.com/uptrace/bun"
+
+	"quiz-log/graph/model"
+	"quiz-log/repository"
 )
 
 type TagService struct {

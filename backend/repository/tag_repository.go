@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"quiz-log/db"
+	"quiz-log/models"
 
 	"github.com/uptrace/bun"
 )
@@ -12,7 +12,7 @@ import (
 // TagRepository defines the interface for tag repository operations
 type TagRepository interface {
 	Create(ctx context.Context, name string) (int, error)
-	FindAll(ctx context.Context) ([]*db.Tag, error)
+	FindAll(ctx context.Context) ([]*models.Tag, error)
 }
 
 type tagRepository struct {
@@ -41,10 +41,10 @@ func (r *tagRepository) Create(ctx context.Context, name string) (int, error) {
 }
 
 // FindAll retrieves all tags
-func (r *tagRepository) FindAll(ctx context.Context) ([]*db.Tag, error) {
+func (r *tagRepository) FindAll(ctx context.Context) ([]*models.Tag, error) {
 	query := psql.Select("id", "name").
 		From("tags").
 		OrderBy("name ASC")
 
-	return FindAll[db.Tag](ctx, r.DB, query)
+	return FindAll[models.Tag](ctx, r.DB, query)
 }

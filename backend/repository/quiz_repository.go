@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"quiz-log/db"
+	"quiz-log/models"
 	"strconv"
 
 	sq "github.com/Masterminds/squirrel"
@@ -16,14 +16,14 @@ type QuizRepository interface {
 	Create(ctx context.Context, title string, description *string) (int, error)
 	Update(ctx context.Context, id int, title *string, description *string) error
 	Delete(ctx context.Context, id int) error
-	FindAll(ctx context.Context) ([]*db.Quiz, error)
-	FindByID(ctx context.Context, id int) (*db.Quiz, error)
-	FindQuestionsByQuizID(ctx context.Context, quizID int) ([]*db.Question, error)
-	FindTagsByQuizID(ctx context.Context, quizID int) ([]*db.Tag, error)
+	FindAll(ctx context.Context) ([]*models.Quiz, error)
+	FindByID(ctx context.Context, id int) (*models.Quiz, error)
+	FindQuestionsByQuizID(ctx context.Context, quizID int) ([]*models.Question, error)
+	FindTagsByQuizID(ctx context.Context, quizID int) ([]*models.Tag, error)
 	AssociateTags(ctx context.Context, quizID int, tagIDs []string) error
 	ClearTags(ctx context.Context, quizID int) error
-	FindQuestionsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*db.Question, error)
-	FindTagsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*db.Tag, error)
+	FindQuestionsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*models.Question, error)
+	FindTagsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*models.Tag, error)
 }
 
 type quizRepository struct {
@@ -97,42 +97,42 @@ func (r *quizRepository) Delete(ctx context.Context, id int) error {
 }
 
 // FindAll retrieves all quizzes
-func (r *quizRepository) FindAll(ctx context.Context) ([]*db.Quiz, error) {
+func (r *quizRepository) FindAll(ctx context.Context) ([]*models.Quiz, error) {
 	query := psql.Select("id", "title", "description", "created_at", "updated_at").
 		From("quizzes").
 		OrderBy("created_at DESC")
 
-	return FindAll[db.Quiz](ctx, r.DB, query)
+	return FindAll[models.Quiz](ctx, r.DB, query)
 }
 
 // FindByID retrieves a quiz by its ID
-func (r *quizRepository) FindByID(ctx context.Context, id int) (*db.Quiz, error) {
+func (r *quizRepository) FindByID(ctx context.Context, id int) (*models.Quiz, error) {
 	query := psql.Select("id", "title", "description", "created_at", "updated_at").
 		From("quizzes").
 		Where("id = ?", id)
 
-	return FindOne[db.Quiz](ctx, r.DB, query)
+	return FindOne[models.Quiz](ctx, r.DB, query)
 }
 
 // FindQuestionsByQuizID retrieves all questions for a quiz
-func (r *quizRepository) FindQuestionsByQuizID(ctx context.Context, quizID int) ([]*db.Question, error) {
+func (r *quizRepository) FindQuestionsByQuizID(ctx context.Context, quizID int) ([]*models.Question, error) {
 	query := psql.Select("id", "quiz_id", "type", "content", "options", "correct_answer", "explanation", "difficulty", "created_at", "updated_at").
 		From("questions").
 		Where("quiz_id = ?", quizID).
 		OrderBy("created_at ASC")
 
-	return FindAll[db.Question](ctx, r.DB, query)
+	return FindAll[models.Question](ctx, r.DB, query)
 }
 
 // FindTagsByQuizID retrieves all tags for a quiz
-func (r *quizRepository) FindTagsByQuizID(ctx context.Context, quizID int) ([]*db.Tag, error) {
+func (r *quizRepository) FindTagsByQuizID(ctx context.Context, quizID int) ([]*models.Tag, error) {
 	query := psql.Select("t.id", "t.name").
 		From("tags t").
 		Join("quiz_tags qt ON t.id = qt.tag_id").
 		Where("qt.quiz_id = ?", quizID).
 		OrderBy("t.name ASC")
 
-	return FindAll[db.Tag](ctx, r.DB, query)
+	return FindAll[models.Tag](ctx, r.DB, query)
 }
 
 // AssociateTags associates tags with a quiz
@@ -166,9 +166,9 @@ func (r *quizRepository) ClearTags(ctx context.Context, quizID int) error {
 }
 
 // FindQuestionsByQuizIDs retrieves all questions for multiple quizzes
-func (r *quizRepository) FindQuestionsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*db.Question, error) {
+func (r *quizRepository) FindQuestionsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*models.Question, error) {
 	if len(quizIDs) == 0 {
-		return make(map[int][]*db.Question), nil
+		return make(map[int][]*models.Question), nil
 	}
 
 	query := psql.Select("id", "quiz_id", "type", "content", "options", "correct_answer", "explanation", "difficulty", "created_at", "updated_at").
@@ -176,24 +176,26 @@ func (r *quizRepository) FindQuestionsByQuizIDs(ctx context.Context, quizIDs []i
 		Where(sq.Eq{"quiz_id": quizIDs}).
 		OrderBy("quiz_id ASC", "created_at ASC")
 
-	questions, err := FindAll[db.Question](ctx, r.DB, query)
+	questions, err := FindAll[models.Question](ctx, r.DB, query)
 	if err != nil {
 		return nil, err
 	}
 
 	// Group questions by quiz_id
-	result := make(map[int][]*db.Question)
+	result := make(map[int][]*models.Question)
 	for _, q := range questions {
-		result[q.QuizID] = append(result[q.QuizID], q)
+		if q.QuizID != nil {
+			result[*q.QuizID] = append(result[*q.QuizID], q)
+		}
 	}
 
 	return result, nil
 }
 
 // FindTagsByQuizIDs retrieves all tags for multiple quizzes
-func (r *quizRepository) FindTagsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*db.Tag, error) {
+func (r *quizRepository) FindTagsByQuizIDs(ctx context.Context, quizIDs []int) (map[int][]*models.Tag, error) {
 	if len(quizIDs) == 0 {
-		return make(map[int][]*db.Tag), nil
+		return make(map[int][]*models.Tag), nil
 	}
 
 	query := psql.Select("t.id", "t.name", "qt.quiz_id").
@@ -215,7 +217,7 @@ func (r *quizRepository) FindTagsByQuizIDs(ctx context.Context, quizIDs []int) (
 	defer dbRows.Close()
 
 	// Group tags by quiz_id
-	result := make(map[int][]*db.Tag)
+	result := make(map[int][]*models.Tag)
 	for dbRows.Next() {
 		var tagID int
 		var tagName string
@@ -224,7 +226,7 @@ func (r *quizRepository) FindTagsByQuizIDs(ctx context.Context, quizIDs []int) (
 		if err != nil {
 			return nil, err
 		}
-		tag := &db.Tag{
+		tag := &models.Tag{
 			ID:   tagID,
 			Name: tagName,
 		}

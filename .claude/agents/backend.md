@@ -1,6 +1,6 @@
 ---
 subagent: true
-name: backend
+name: server
 description: Backend development specialist for Go, GraphQL (gqlgen), PostgreSQL, and API development
 tools:
   - Read

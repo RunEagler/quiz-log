@@ -16,7 +16,7 @@ const mergedSchema = mergeTypeDefs(typesArray);
 const printedSchema = print(mergedSchema);
 
 // Write to shared/schema directory
-const outputPath = path.join(__dirname, '../../frontend/schema/schema.graphql');
+const outputPath = path.join(__dirname, '../../web/schema/schema.graphql');
 const outputDir = path.dirname(outputPath);
 
 // Ensure directory exists

@@ -1,12 +1,12 @@
 # Backend
-backend/__debug_bin
-backend/graph/generated.go
-backend/graph/model/models_gen.go
+server/__debug_bin
+server/graph/generated.go
+server/graph/model/models_gen.go
 
 # Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/src/__generated__/
+web/node_modules/
+web/dist/
+web/src/__generated__/
 
 
 shared/schema/schema.graphql

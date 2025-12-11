@@ -20,9 +20,9 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: server
       dockerfile: Dockerfile
-    container_name: quizlog-backend
+    container_name: quizlog-server
     environment:
       PORT: 8080
       DB_HOST: db
@@ -38,10 +38,10 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: web
       dockerfile: Dockerfile
       target: development
-    container_name: quizlog-frontend
+    container_name: quizlog-web
     environment:
       - VITE_GRAPHQL_ENDPOINT=http://localhost:8080/query
     ports:
@@ -49,7 +49,7 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./frontend:/app
+      - ./web:/app
       - /app/node_modules
     command: npm run dev -- --host
 

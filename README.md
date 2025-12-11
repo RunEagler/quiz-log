@@ -49,14 +49,14 @@ A quiz creation app for reviewing what you've learned
 createdb quizlog
 
 # Run migrations
-cd backend
+cd server
 make migrate-up
 ```
 
 ### Backend Setup
 
 ```bash
-cd backend
+cd server
 
 # Install dependencies
 make install
@@ -78,7 +78,7 @@ GraphQL Playground: http://localhost:8080/
 ### Frontend Setup
 
 ```bash
-cd frontend
+cd web
 
 # Install dependencies
 npm install
@@ -105,7 +105,7 @@ Frontend runs at http://localhost:5173
 Migrations are managed using sql-migrate.
 
 ```bash
-cd backend
+cd server
 
 # Check migration status
 make migrate-status

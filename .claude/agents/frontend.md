@@ -1,6 +1,6 @@
 ---
 subagent: true
-name: frontend
+name: web
 description: Frontend development specialist for React, TypeScript, Relay, and Vite
 tools:
   - Read
